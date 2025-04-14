@@ -20,7 +20,64 @@ genai.configure(api_key=os.environ.get('geminiapikey'))
 # LIFF ID（你的特定 URL）
 liffid = '2006620225-p5Ae3ykb'
 
+# 溫柔問答題目
+questions = [
+    "🌿 1. 壓力與焦慮管理\n「嗨，歡迎你來到這裡。感覺你可能有點累了，或者心裡有點壓力，對嗎？\n想跟我聊聊最近讓你覺得焦慮或壓力大的事情嗎？」",
+    
+    "🌸 2. 自我探索與內在成長\n「有時候，我們會突然停下腳步，問自己：『我到底是誰？我真正想要的是什麼？』\n你最近也有這樣的感覺嗎？」",
+
+    "💞 3. 人際關係與情感困擾\n「有些情感放在心裡久了會變得沉重，尤其是在人際關係中。\n你最近在人與人之間的連結上，有什麼讓你感到難過或困擾的嗎？」",
+
+    "🍃 4. 身體健康與能量平衡\n「你的身體最近還好嗎？有時候我們忙著照顧別人，會忘了自己也需要被好好照顧。」",
+
+    "✨ 5. 靈性連結與心靈成長\n「有時候，我們會感覺自己想找回與內在或宇宙的連結。\n你最近是否有這種渴望？想要更靠近那份寧靜與光？」"
+]
+
+
+# 分類關鍵字
+category_keywords = {
+    "body": [
+        "累", "疲倦", "疲憊", "無力", "睡", "睡不好", "睡不著", "失眠",
+        "身體", "頭痛", "胃痛", "背痛", "肩膀緊", "心悸", "頭暈", "不舒服", "疼痛",
+        "沒精神", "倦怠", "身體沉重", "感冒", "生理痛", "月經不順"
+    ],
+    "mind": [
+        "焦慮", "壓力", "孤單", "低落", "沮喪", "煩惱", "情緒", "緊張", "不安",
+        "憂鬱", "難過", "委屈", "崩潰", "不想動", "情緒化", "內耗", "煩躁",
+        "失落", "心煩", "恐懼", "沒有動力", "覺得累", "想逃避"
+    ],
+    "spirit": [
+        "意義", "人生", "存在", "靈魂", "心靈", "空虛", "迷惘", "自我", "覺醒",
+        "靈性", "宇宙", "高我", "內在聲音", "使命", "方向", "冥想", "連結",
+        "能量", "轉化", "療癒", "覺察", "成長", "覺知", "找不到自己"
+    ]
+}
+
+# 使用者狀態與回答紀錄
+
+user_states = {}      # {user_id: 問題進度}
+user_answers = {}     # {user_id: [回答串]}
+
+def classify_user(answers):
+    scores = {"body": 0, "mind": 0, "spirit": 0}
+    for ans in answers:
+        for category, keywords in category_keywords.items():
+            if any(kw in ans.lower() for kw in keywords):
+                scores[category] += 1
+    return max(scores, key=scores.get)
+
+def recommend_forum(category):
+    forums = {
+        "body": "你可以看看這個身體保健的溫柔角落 🌿 https://example.com/body",
+        "mind": "這裡有一些心理支持的溫暖資源 🧠 https://example.com/mind",
+        "spirit": "想探索心靈與自我，可以看看這個空間 ✨ https://example.com/spirit"
+    }
+    return forums.get(category, "希望這段對話有帶給你一些溫暖 💖")
+
+
+
 @app.route("/callback", methods=['POST'])
+
 def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
@@ -35,6 +92,8 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     mtext = event.message.text
+    
+    user_id = event.source.user_id
     
     # 處理自定義指令
     if mtext == '平台介紹':
@@ -119,8 +178,39 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, messages)
         except Exception as e:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
+            
+    elif mtext == '開始對話':
+        user_states[user_id] = 0
+        user_answers[user_id] = []
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=questions[0])
+        )        
+    elif user_id in user_states:
+        answer = mtext.strip()
+        user_answers[user_id].append(answer)
 
+        current_index = user_states[user_id] + 1
 
+        if current_index < len(questions):
+            user_states[user_id] = current_index  # 更新問答進度
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=questions[current_index])  # 問下一題
+            )
+        else:
+            # 完成問答，根據回答進行分類並推薦相對應的論壇
+            category = classify_user(user_answers[user_id])
+            reply = recommend_forum(category)
+
+            # 清除該用戶的問答狀態和回答紀錄
+            del user_states[user_id]
+            del user_answers[user_id]
+
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=reply)  # 推薦資源
+            )    
         
     else:
         # 如果是其他文字，則使用 Google Generative AI 生成回應
