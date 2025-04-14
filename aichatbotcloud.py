@@ -68,11 +68,46 @@ def classify_user(answers):
 
 def recommend_forum(category):
     forums = {
-        "body": "你可以看看這個身體保健的溫柔角落 🌿 https://example.com/body",
-        "mind": "這裡有一些心理支持的溫暖資源 🧠 https://example.com/mind",
-        "spirit": "想探索心靈與自我，可以看看這個空間 ✨ https://example.com/spirit"
+        "body": "你可以看看這個身體保健的溫柔角落 🌿 https://a111221038.wixstudio.com/my-site-3/forum/pu-tong-tao-lun?rc=test-site",
+        "mind": "這裡有一些心理支持的溫暖資源 🧠 https://a111221038.wixstudio.com/my-site-3/forum/wen-yu-da?rc=test-site",
+        "spirit": "想探索心靈與自我，可以看看這個空間 ✨ https://a111221038.wixstudio.com/my-site-3/forum/zhi-xian-yuan-gong?rc=test-site"
     }
     return forums.get(category, "希望這段對話有帶給你一些溫暖 💖")
+
+def basic_emotion_analysis(answer):
+    answer = answer.lower()
+    if any(keyword in answer for keyword in ['錢', '沒錢', '薪水', '經濟', '月底', '房租', '負擔', '工作薪資']):
+        return "金錢壓力"
+    elif any(keyword in answer for keyword in ['男友', '女友', '感情', '愛情', '分手', '戀愛', '前任', '伴侶', '失戀', '情人']):
+        return "情感困擾"
+    elif any(keyword in answer for keyword in ['孤單', '寂寞', '沒人懂', '朋友', '人際', '吵架', '冷戰']):
+        return "人際孤獨"
+    elif any(keyword in answer for keyword in ['不知道', '還好', '沒有', '普通', '沒什麼', '就這樣']):
+        return "低能量"
+    elif any(keyword in answer for keyword in ['壓力', '焦慮', '緊張', '疲憊', '擔心', '煩躁', '煩']):
+        return "焦慮"
+    elif any(keyword in answer for keyword in ['快樂', '開心', '平靜', '放鬆', '自在', '穩定']):
+        return "穩定"
+    elif any(keyword in answer for keyword in ['生病', '頭痛', '身體不舒服', '感冒', '累', '不想動']):
+        return "身體不適"
+    elif any(keyword in answer for keyword in ['沒意義', '空虛', '迷失', '人生', '存在', '想法混亂']):
+        return "靈性迷惘"
+    else:
+        return "未知"
+
+def generate_mid_reply(emotion):
+    replies = {
+        "金錢壓力": "經濟壓力真的會壓得人喘不過氣…願你在煩惱之中，也能找到一點點喘息的空間 🌿",
+        "情感困擾": "感情的世界總是特別深…謝謝你願意說出口，我會一直在 💞",
+        "人際孤獨": "人與人的距離有時真的會讓人感到好孤單…但你不是一個人，我在這裡陪你 🍃",
+        "低能量": "沒關係的，就算什麼都不想說也沒關係～我會一直在這裡陪你 🌙",
+        "焦慮": "感覺你最近真的很辛苦呢…深呼吸一下，我們一步一步慢慢來 🌸",
+        "穩定": "聽你這麼說我也覺得好安心～希望這樣的感覺可以一直持續 ✨",
+        "身體不適": "身體不舒服的時候，什麼事都變得好困難。要記得好好休息喔 🛌",
+        "靈性迷惘": "對人生的迷惘是靈魂在對你說話，也許這段路會帶你去某個答案 ✨",
+        "未知": "謝謝你願意分享這些…這裡是你可以慢慢說話的空間 🌼"
+    }
+    return replies.get(emotion, replies["未知"])
 
 
 
@@ -110,107 +145,55 @@ def handle_message(event):
     elif mtext == '著名講師':
         sendCarousel2(event)
         
-    elif mtext == '身體':
-       
-        try:
-            messages = [
-                TextSendMessage(text="身體健康!\n\n維持良好的身體健康需要適當的運動、均衡的飲食和充足的休息\n身體狀況良好時，心理和精神狀態也會更穩定\n幫助我們面對生活中的各種挑戰"),
-                #ImageSendMessage(original_content_url="https://i.imgur.com/H253Dss.jpeg", preview_image_url="https://i.imgur.com/H253Dss.jpeg"),
-                TemplateSendMessage(
-                    alt_text='身體健康資訊',
-                    template=ButtonsTemplate(
-                        title='更多資訊',
-                        text='點擊下方按鈕查看網站',
-                        actions=[
-                            URITemplateAction(
-                                label='訪問網站',
-                                uri='https://a111221038.wixstudio.com/my-site-3/forum/pu-tong-tao-lun?rc=test-site'
-                            )
-                        ]
-                    )
-                )
-            ]
-            line_bot_api.reply_message(event.reply_token, messages)
-        except Exception as e:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-               
-    elif mtext == '心理':
-        try:
-            messages = [
-                TextSendMessage(text="心靈平靜!\n\n是一種內心的寧靜和安穩狀態\n當我們的內心不再被外界的壓力和焦慮所打擾\n便能感受到這份平和。\n保持心靈平靜的方式包括冥想\n正念練習和自我反思。\n這些方法能幫助我們放下煩惱，專注當下，進而減少焦慮和壓力。\n心靈的平靜不僅能讓我們處理生活中的困難更加冷靜，也能讓我們在日常生活中感受到更多的幸福與滿足。\n在快速變化的世界中，保持心靈平靜是每個人都可以努力實踐的目標。"),
-                #ImageSendMessage(original_content_url="https://i.imgur.com/H253Dss.jpeg", preview_image_url="https://i.imgur.com/H253Dss.jpeg"),
-                TemplateSendMessage(
-                    alt_text='靈性成長資訊',
-                    template=ButtonsTemplate(
-                        title='更多資訊',
-                        text='點擊下方按鈕查看網站',
-                        actions=[
-                            URITemplateAction(
-                                label='訪問網站',
-                                uri='https://a111221038.wixstudio.com/my-site-3/forum/wen-yu-da?rc=test-site'
-                            )
-                        ]
-                    )
-                )
-            ]
-            line_bot_api.reply_message(event.reply_token, messages)
-        except Exception as e:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-    elif mtext == '靈性':
-        try:
-            messages = [
-                TextSendMessage(text="靈性成長!\n\n靈性成長是指在個人內在世界的探索過程中\n尋找生命的深層意義和目的。\n透過冥想、反思和學習，人們能夠拓展自己的心智與靈性\n增進對宇宙和人生的感悟。\n靈性成長的過程幫助我們理解自己的內心需求\n並能提升我們的同理心和對他人的愛。\n這種成長不僅能讓我們達到內心的平靜\n也能讓我們在生活中更加有方向感，過得更有意義。"),
-                #ImageSendMessage(original_content_url="https://i.imgur.com/H253Dss.jpeg", preview_image_url="https://i.imgur.com/H253Dss.jpeg"),
-                TemplateSendMessage(
-                    alt_text='靈性成長資訊',
-                    template=ButtonsTemplate(
-                        title='更多資訊',
-                        text='點擊下方按鈕查看網站',
-                        actions=[
-                            URITemplateAction(
-                                label='訪問網站',
-                                uri='https://a111221038.wixstudio.com/my-site-3/forum/zhi-xian-yuan-gong?rc=test-site'
-                            )
-                        ]
-                    )
-                )
-            ]
-            line_bot_api.reply_message(event.reply_token, messages)
-        except Exception as e:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-            
-    elif mtext == '開始對話':
+    
+    
+    # 指令：基礎問答啟動
+    elif mtext == '基礎問答':
         user_states[user_id] = 0
         user_answers[user_id] = []
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=questions[0])
-        )        
+        )
+        return
+
+    # 問答進行中
     elif user_id in user_states:
         answer = mtext.strip()
         user_answers[user_id].append(answer)
 
+        # ➕ 分析情緒並產生溫柔回覆
+        emotion = basic_emotion_analysis(answer)
+        mid_reply = generate_mid_reply(emotion)
+
         current_index = user_states[user_id] + 1
 
         if current_index < len(questions):
-            user_states[user_id] = current_index  # 更新問答進度
+            user_states[user_id] = current_index
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=questions[current_index])  # 問下一題
+                [
+                    TextSendMessage(text=mid_reply),
+                    TextSendMessage(text=questions[current_index])
+                ]
             )
         else:
-            # 完成問答，根據回答進行分類並推薦相對應的論壇
+            # 最後一題，進行分類與推薦
             category = classify_user(user_answers[user_id])
-            reply = recommend_forum(category)
+            final_reply = recommend_forum(category)
 
-            # 清除該用戶的問答狀態和回答紀錄
+            # 清除用戶狀態
             del user_states[user_id]
             del user_answers[user_id]
 
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=reply)  # 推薦資源
-            )    
+                [
+                    TextSendMessage(text=mid_reply),
+                    TextSendMessage(text=final_reply)
+                ]
+            )
+        return
         
     else:
         # 如果是其他文字，則使用 Google Generative AI 生成回應
