@@ -33,6 +33,23 @@ questions = [
     "✨ 5. 靈性連結與心靈成長\n「有時候，我們會感覺自己想找回與內在或宇宙的連結。\n你最近是否有這種渴望？想要更靠近那份寧靜與光？」"
 ]
 
+# 心得生成
+questions2 = [
+    "🌿 1. 課程哪部分最有幫助？",
+    
+    "🌸 2. 有沒有哪裡可以改進？",
+
+    "💞 3. 老師教學風格如何？",
+
+    "🍃 4. 今天學到的重點是什麼？",
+
+    "✨ 5. 推薦程度（1-5 顆星）"
+]
+
+# 儲存課後心得狀態用
+course_feedback_states = {}
+course_feedback_answers = {}
+
 
 # 分類關鍵字
 category_keywords = {
@@ -199,6 +216,63 @@ def handle_message(event):
                 ]
             )
         return
+    
+    # 啟動課後心得問答流程
+    elif mtext == '課後心得':
+        course_feedback_states[user_id] = 0
+        course_feedback_answers[user_id] = []
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=questions2[0])
+        )
+        return
+    
+    # 若使用者正在進行課後心得問答
+    elif user_id in course_feedback_states:
+        answer = mtext.strip()
+        course_feedback_answers[user_id].append(answer)
+    
+        current_index = course_feedback_states[user_id] + 1
+    
+        if current_index < len(questions2):
+            course_feedback_states[user_id] = current_index
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=questions2[current_index])
+            )
+        else:
+            # 問卷完成，準備生成心得
+            student_answers = course_feedback_answers[user_id]
+            prompt = f"根據以下課後問卷回答，請幫我生成一段 150 字內的課後心得，用第一人稱自然語氣撰寫。\n"
+            for idx, ans in enumerate(student_answers, 1):
+                prompt += f"{idx}. {ans}\n"
+    
+            try:
+                model = genai.GenerativeModel("gemini-1.5-flash")
+                response = model.generate_content(prompt)
+                summary = response.text.strip()
+    
+                # 清除狀態
+                del course_feedback_states[user_id]
+                del course_feedback_answers[user_id]
+    
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    [
+                        TextSendMessage(text="📝 以下是為你自動生成的課後心得："),
+                        TextSendMessage(text=summary),
+                        TextSendMessage(text="若你滿意這段心得，可回覆『發布心得』來讓它上傳至網站～")
+                    ]
+                )
+    
+                # 可在這邊先暫存 summary 綁定 user_id，待確認發布
+                # e.g., pending_summaries[user_id] = summary
+    
+            except Exception as e:
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'生成心得失敗：{str(e)}'))
+
+            return
+
         
     else:
         # 如果是其他文字，則使用 Google Generative AI 生成回應
