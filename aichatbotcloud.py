@@ -243,7 +243,7 @@ def handle_message(event):
         else:
             # 問卷完成，準備生成心得
             student_answers = course_feedback_answers[user_id]
-            prompt = f"根據以下課後問卷回答，請幫我生成一段 150 字內的課後心得，用第一人稱自然語氣撰寫。\n"
+            prompt = f"根據以下體驗後問卷回答，請幫我整理成一段100到150字的心得紀錄，用溫柔、靈性陪伴的語氣撰寫，避免太商業化\n"
             for idx, ans in enumerate(student_answers, 1):
                 prompt += f"{idx}. {ans}\n"
     
