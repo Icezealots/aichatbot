@@ -4,6 +4,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ButtonsTemplate, URITemplateAction, StickerSendMessage, ImageSendMessage,CarouselTemplate, CarouselColumn
 )
+import psycopg2
 import google.generativeai as genai
 import os
 
@@ -56,19 +57,35 @@ category_keywords = {
     "body": [
         "累", "疲倦", "疲憊", "無力", "睡", "睡不好", "睡不著", "失眠",
         "身體", "頭痛", "胃痛", "背痛", "肩膀緊", "心悸", "頭暈", "不舒服", "疼痛",
-        "沒精神", "倦怠", "身體沉重", "感冒", "生理痛", "月經不順"
+        "沒精神", "倦怠", "身體沉重", "感冒", "生理痛", "月經不順",
+        "睡眠品質", "鬆不開", "呼吸困難", "心跳加快", "胃脹氣", "頭悶", "肩頸痠痛",
+        "腸胃不適", "皮膚過敏", "過敏", "手腳冰冷", "食慾不振", "嗜睡", "常生病",
+        "免疫力差", "腰痠", "肌肉緊繃", "身體卡卡", "睡醒更累", "長痘痘",
+        "覺得身體怪怪的", "哪裡都不舒服", "整個人軟掉", "提不起精神",
     ],
     "mind": [
         "焦慮", "壓力", "孤單", "低落", "沮喪", "煩惱", "情緒", "緊張", "不安",
         "憂鬱", "難過", "委屈", "崩潰", "不想動", "情緒化", "內耗", "煩躁",
-        "失落", "心煩", "恐懼", "沒有動力", "覺得累", "想逃避"
+        "失落", "心煩", "恐懼", "沒有動力", "覺得累", "想逃避",
+        "想太多", "心累", "無助", "忍不住哭", "無力感", "沒有方向",
+        "情緒低潮", "難以專注", "壓抑", "繃緊", "常常發呆", "思緒混亂",
+        "被否定", "沒人懂", "覺得被討厭", "失控", "想消失", "不被理解",
+        "自我懷疑", "過度努力",
+        "腦袋停不下來", "一直轉念頭", "心裡很雜", "卡住出不來", "很煩很煩", "腦子打結",
     ],
     "spirit": [
         "意義", "人生", "存在", "靈魂", "心靈", "空虛", "迷惘", "自我", "覺醒",
         "靈性", "宇宙", "高我", "內在聲音", "使命", "方向", "冥想", "連結",
-        "能量", "轉化", "療癒", "覺察", "成長", "覺知", "找不到自己"
+        "能量", "轉化", "療癒", "覺察", "成長", "覺知", "找不到自己",
+        "找不到意義", "覺得空洞", "活著為什麼", "無所歸屬", "心靈空虛",
+        "宇宙訊息", "指引", "宇宙法則", "靈魂契約", "身心靈", "通靈", "昇華",
+        "靈魂旅程", "與自己對話", "內在小孩", "靜心", "宇宙連線", "內在指引",
+        "意識擴展", "靈魂碎片", "醒來的感覺",
+        "覺得被困住", "不知道我到底是誰", "覺得空空的", "對什麼都沒感覺",
+        "一直在找答案", "想要找回自己", "感覺不到熱情", "心好遠"
     ]
 }
+
 
 # 使用者狀態與回答紀錄
 
@@ -255,6 +272,9 @@ def handle_message(event):
                 # 清除狀態
                 del course_feedback_states[user_id]
                 del course_feedback_answers[user_id]
+                
+                # 儲存心得至資料庫
+                save_feedback_to_db(user_id, summary)
     
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -390,6 +410,27 @@ def sendCarousel2(event):
         line_bot_api.reply_message(event.reply_token, message)
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
+        
+        # 設定資料庫連接
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname="soulv_db", 
+        user="soulv", 
+        password="sdMUpozNTsUhq1bG5Kzs1d5Lq0FsbtDX",
+        host="dpg-d014hq2dbo4c73drlss0-a.oregon-postgres.render.com", 
+        port="5432"
+    )
+    return conn
+
+# 儲存心得到資料庫
+def save_feedback_to_db(user_id, feedback):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = "INSERT INTO feedbacks (user_id, feedback) VALUES (%s, %s)"
+    cursor.execute(query, (user_id, feedback))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 if __name__ == '__main__':
