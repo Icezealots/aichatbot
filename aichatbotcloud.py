@@ -457,7 +457,7 @@ def save_feedback_to_wix_cms(user_id, feedback):
         }
     }
 
-    response = requests.post(endpoint, json=payload, headers=headers)
+    response = request.post(endpoint, json=payload, headers=headers)
     if response.status_code == 200:
         print("✅ 成功寫入 Wix CMS！")
     else:
