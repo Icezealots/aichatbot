@@ -17,6 +17,8 @@ handler = WebhookHandler(os.environ.get('LinebotSecret'))
 
 # Google Generative AI 配置
 genai.configure(api_key=os.environ.get('geminiapikey'))
+# wix 配置
+wix_api_url = "https://a111221038.wixstudio.com/my-site-3/_functions/addFeedbacks"
 
 # LIFF ID（你的特定 URL）
 liffid = '2006620225-p5Ae3ykb'
@@ -354,7 +356,7 @@ def handle_message(event):
                 del course_feedback_answers[user_id]
                 
                 # 儲存心得至資料庫
-                save_feedback_to_db(user_id, summary)
+                save_feedback_to_wix_cms(user_id, summary)
     
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -438,79 +440,28 @@ def sendCarousel(event):
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
 
-def sendCarousel2(event):
-    try:
-        message = TemplateSendMessage(
-            alt_text='轉盤樣板',
-            template=CarouselTemplate(
-                columns=[
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/ZDb0U5y.jpeg',
-                        text='王崇恩講師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/j2Aju8v.jpeg',
-                        text='玟明慧法師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/ZDb0U5y.jpeg',
-                        text='玉晴算命師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/j2Aju8v.jpeg',
-                        text='白忻月講師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    )
-                ]
-            )
-        )
-        line_bot_api.reply_message(event.reply_token, message)
-    except Exception as e:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-        
-        # 設定資料庫連接
-def get_db_connection():
-    conn = psycopg2.connect(
-        dbname="soulv_db", 
-        user="soulv", 
-        password="sdMUpozNTsUhq1bG5Kzs1d5Lq0FsbtDX",
-        host="dpg-d014hq2dbo4c73drlss0-a.oregon-postgres.render.com", 
-        port="5432"
-    )
-    return conn
 
-# 儲存心得到資料庫
-def save_feedback_to_db(user_id, feedback):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    query = "INSERT INTO feedbacks (user_id, feedback) VALUES (%s, %s)"
-    cursor.execute(query, (user_id, feedback))
-    conn.commit()
-    cursor.close()
-    conn.close()
+
+# 儲存心得到 Wix CMS
+def save_feedback_to_wix_cms(user_id, feedback):
+    endpoint = "https://wixdatabaseadapter.onrender.com/insert"
+    headers = {
+        "Authorization": "sdMUpozNTsUhq1bG5Kzs1d5Lq0FsbtDX",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "collectionName": "feedbacks",
+        "item": {
+            "user_id": user_id,
+            "feedback": feedback
+        }
+    }
+
+    response = requests.post(endpoint, json=payload, headers=headers)
+    if response.status_code == 200:
+        print("✅ 成功寫入 Wix CMS！")
+    else:
+        print(f"❌ 發生錯誤: {response.status_code}, {response.text}")
 
 
 if __name__ == '__main__':
