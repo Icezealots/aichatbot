@@ -494,10 +494,10 @@ def sendCarousel2(event):
         # 設定資料庫連接
 def get_db_connection():
     conn = psycopg2.connect(
-        dbname="soulv_db", 
+        dbname="soulv_db_c786", 
         user="soulv", 
-        password="sdMUpozNTsUhq1bG5Kzs1d5Lq0FsbtDX",
-        host="dpg-d014hq2dbo4c73drlss0-a.oregon-postgres.render.com", 
+        password="S1Kt0kXT9u71SNvtyGmoOgXKTs2MZ38y",
+        host="dpg-d08obl15pdvs739nmkp0-a.oregon-postgres.render.com", 
         port="5432"
     )
     return conn
