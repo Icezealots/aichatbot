@@ -367,7 +367,7 @@ def handle_message(event):
                     [
                         TextSendMessage(text="📝 以下是為你自動生成的課後心得："),
                         TextSendMessage(text=summary),
-                        TextSendMessage(text="👉 點此發佈你的心得到網站上：\n" + forum_url)
+                        TextSendMessage(text="請點選以下連結，將這段心得貼到網站上與大家分享：\nhttps://www.soulv.fun/forum/zhi-xian-yuan-gong/create-post?rc=test-site")
                     ]
                 )
     
