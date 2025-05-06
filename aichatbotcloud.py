@@ -351,7 +351,12 @@ def handle_message(event):
                 # 清除狀態
                 del course_feedback_states[user_id]
                 del course_feedback_answers[user_id]
-                
+
+                # 編碼 summary 以便放入網址參數
+                encoded_summary = quote_plus(summary)
+
+                # 組合網址，將 summary 當作參數帶入網站
+                forum_url = f"https://www.soulv.fun/forum/zhi-xian-yuan-gong/create-post?rc=test-site&content={encoded_summary}"
                 # 儲存心得至資料庫
                 #save_feedback_to_db(user_id, summary)
     
@@ -360,7 +365,7 @@ def handle_message(event):
                     [
                         TextSendMessage(text="📝 以下是為你自動生成的課後心得："),
                         TextSendMessage(text=summary),
-                        TextSendMessage(text="若你滿意這段心得，可回覆『發布心得』來讓它上傳至網站～")
+                        TextSendMessage(text="👉 點此發佈你的心得到網站上：\n" + forum_url)
                     ]
                 )
     
