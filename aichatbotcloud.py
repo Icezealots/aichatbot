@@ -375,7 +375,14 @@ def handle_message(event):
                 # e.g., pending_summaries[user_id] = summary
     
             except Exception as e:
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'生成心得失敗：{str(e)}'))
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    [
+                        TextSendMessage(text="😢 很抱歉，產生心得時出了點小狀況，請稍後再試一次，或直接將你的分享貼到網站上。"),
+                        TextSendMessage(text=f"🛠️ 技術訊息（請截圖給開發者）：{str(e)}")
+                    ]
+                )
+
 
             return
 
