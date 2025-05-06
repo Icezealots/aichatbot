@@ -7,6 +7,8 @@ from linebot.models import (
 import psycopg2
 import google.generativeai as genai
 import os
+from urllib.parse import quote_plus
+
 
 # 初始化 Flask 應用程式
 app = Flask(__name__)
