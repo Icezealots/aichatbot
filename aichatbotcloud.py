@@ -353,7 +353,7 @@ def handle_message(event):
                 del course_feedback_answers[user_id]
                 
                 # 儲存心得至資料庫
-                save_feedback_to_db(user_id, summary)
+                #save_feedback_to_db(user_id, summary)
     
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -437,59 +437,7 @@ def sendCarousel(event):
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
 
-def sendCarousel2(event):
-    try:
-        message = TemplateSendMessage(
-            alt_text='轉盤樣板',
-            template=CarouselTemplate(
-                columns=[
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/ZDb0U5y.jpeg',
-                        text='王崇恩講師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/j2Aju8v.jpeg',
-                        text='玟明慧法師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/ZDb0U5y.jpeg',
-                        text='玉晴算命師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://i.imgur.com/j2Aju8v.jpeg',
-                        text='白忻月講師',
-                        actions=[
-                            URITemplateAction(
-                                label='講師資訊連結',
-                                uri='https://a111221038.wixstudio.com/my-site-3'
-                            )
-                        ]
-                    )
-                ]
-            )
-        )
-        line_bot_api.reply_message(event.reply_token, message)
-    except Exception as e:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-        
+
         # 設定資料庫連接
 def get_db_connection():
     conn = psycopg2.connect(
