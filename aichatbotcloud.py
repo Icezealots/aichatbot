@@ -18,8 +18,7 @@ handler = WebhookHandler(os.environ.get('LinebotSecret'))
 # Google Generative AI 配置
 genai.configure(api_key=os.environ.get('geminiapikey'))
 
-# LIFF ID（你的特定 URL）
-liffid = '2006620225-p5Ae3ykb'
+
 
 # 溫柔問答題目
 questions = [
@@ -102,9 +101,9 @@ def classify_user(answers):
 
 def recommend_forum(category):
     forums = {
-        "body": "你可以看看這個身體保健的溫柔角落 🌿 https://a111221038.wixstudio.com/my-site-3/forum/pu-tong-tao-lun?rc=test-site",
-        "mind": "這裡有一些心理支持的溫暖資源 🧠 https://a111221038.wixstudio.com/my-site-3/forum/wen-yu-da?rc=test-site",
-        "spirit": "想探索心靈與自我，可以看看這個空間 ✨ https://a111221038.wixstudio.com/my-site-3/forum/zhi-xian-yuan-gong?rc=test-site"
+        "body": "你可以看看這個身體保健的溫柔角落 🌿 https://www.soulv.fun/forum/pu-tong-tao-lun?rc=test-site",
+        "mind": "這裡有一些心理支持的溫暖資源 🧠 https://www.soulv.fun/forum/wen-yu-da?rc=test-site",
+        "spirit": "想探索心靈與自我，可以看看這個空間 ✨ https://www.soulv.fun/forum/zhi-xian-yuan-gong?rc=test-site"
     }
     return forums.get(category, "希望這段對話有帶給你一些溫暖 💖")
 
