@@ -268,7 +268,7 @@ def handle_message(event):
     
     
     # 指令：基礎問答啟動
-    elif mtext == '和我聊聊+':
+    elif mtext == '和我聊聊':
         user_states[user_id] = 0
         user_answers[user_id] = []
         line_bot_api.reply_message(
