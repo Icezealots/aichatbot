@@ -273,6 +273,42 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, message)
         except Exception as e:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
+    
+    elif mtext == '開始使用':
+        user_id = event.source.user_id
+        role = get_user_role(user_id)
+        
+        if role == '學員':
+            text = (
+                "🌀 [Soulv Bot] 嗨，親愛的學員 💫 感謝你參與這次的療癒體驗，我們希望知道：它對你的改變是什麼？\n\n"
+                "🌱【立即完成 1 分鐘靈性回饋】 就能解鎖以下好禮：\n"
+                "👉 問卷連結：https://www.soulv.fun/feedback\n\n"
+                "🎁 解鎖報告／抽獎／成長紀錄等\n\n"
+                "👇 你還可以選擇：\n"
+                "1️⃣ 查看我的靈性成長紀錄\n"
+                "2️⃣ 查看下一個推薦課程\n"
+                "3️⃣ 回報體驗問題"
+            )
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=text))
+
+    elif role == '療癒師':
+        text = (
+            "🔔 [Soulv Bot] 嗨，老師 🌿 Soulv 為您準備好提升「靈性影響力」的秘密武器了！\n\n"
+            "✨【你專屬的問卷回饋任務已啟動】\n"
+            "✅ 獲得五星導師徽章\n"
+            "✅ 系統自動優先推薦\n"
+            "✅ 問卷數據成為認證依據\n\n"
+            "👉 這是你專屬的問卷連結：https://www.soulv.fun/form?teacher_id={user_id}\n\n"
+            "👇 請選擇：\n"
+            "1️⃣ 我的問卷完成率\n"
+            "2️⃣ 我要修改介紹頁面\n"
+            "3️⃣ 瞭解如何取得更多推薦"
+        )
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=text))
+
+    else:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請先選擇你的身分 🙏"))
+        
             
     elif mtext == '我是學員' or mtext == '我是療癒師':
         role = '學員' if mtext == '我是學員' else '療癒師'
