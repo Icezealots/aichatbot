@@ -2,7 +2,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ButtonsTemplate, URITemplateAction, StickerSendMessage, ImageSendMessage,CarouselTemplate, CarouselColumn
+    MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ButtonsTemplate, URITemplateAction, StickerSendMessage, ImageSendMessage,CarouselTemplate, CarouselColumn, QuickReply, QuickReplyButton, MessageAction
 )
 import psycopg2
 import google.generativeai as genai
@@ -250,11 +250,24 @@ def handle_message(event):
     
     user_id = event.source.user_id
     
+    
     # 處理自定義指令
     if mtext == '進入Soulv':
         try:
+            text = (
+                "Soulv \n身心靈界的米其林指南\n全球首個身心靈開箱與評鑑指南\n幫助你找到真正值得信賴的療癒體驗與課程\n"
+                "不只是要創造一個平台\n而是一場身心靈療癒界的透明化運動。\n"
+                "Soulv 如何運作？\n真實用戶評價機制確保每則評價來自真實參與者\n拒絕灌水與虛假評論。\n"
+                "頂級療癒師評審團由業界領袖組成的專業評審團，\n確保高品質的療癒體驗。\n"
+                "透明數據與公正推薦參考米其林評鑑標準\n以公平、透明的數據分析，幫助用戶找到最適合的療癒課程與療癒師\n"
+                "🌐 Soulv網址：https://www.soulv.fun/\n\n👉 請選擇你的身分以下開始："
+            )
             message = TextSendMessage(
-                text="Soulv \n身心靈界的米其林指南\n全球首個身心靈開箱與評鑑指南\n幫助你找到真正值得信賴的療癒體驗與課程\n不只是要創造一個平台\n而是一場身心靈療癒界的透明化運動。\nSoulv 如何運作？\n真實用戶評價機制確保每則評價來自真實參與者\n拒絕灌水與虛假評論。\n頂級療癒師評審團由業界領袖組成的專業評審團，\n確保高品質的療癒體驗。\n透明數據與公正推薦參考米其林評鑑標準\n以公平、透明的數據分析，幫助用戶找到最適合的療癒課程與療癒師\nSoulv網址:https://www.soulv.fun/。"
+                text=text,
+                quick_reply=QuickReply(items=[
+                    QuickReplyButton(action=MessageAction(label="我是學員 👩‍🎓", text="我是學員")),
+                    QuickReplyButton(action=MessageAction(label="我是療癒師 🧘‍♀️", text="我是療癒師"))
+                ])
             )
             line_bot_api.reply_message(event.reply_token, message)
         except Exception as e:
@@ -262,8 +275,6 @@ def handle_message(event):
 
     elif mtext == '熱門體驗':
         sendCarousel(event)
-    elif mtext == '著名講師':
-        sendCarousel2(event)
         
     
     
@@ -386,7 +397,7 @@ def handle_message(event):
 
             return
 
-        
+       
     else:
         # 如果是其他文字，則使用 Google Generative AI 生成回應
         user_prompt = mtext
