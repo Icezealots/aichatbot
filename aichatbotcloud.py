@@ -291,23 +291,23 @@ def handle_message(event):
             )
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=text))
 
-    elif role == '療癒師':
-        text = (
-            "🔔 [Soulv Bot] 嗨，老師 🌿 Soulv 為您準備好提升「靈性影響力」的秘密武器了！\n\n"
-            "✨【你專屬的問卷回饋任務已啟動】\n"
-            "✅ 獲得五星導師徽章\n"
-            "✅ 系統自動優先推薦\n"
-            "✅ 問卷數據成為認證依據\n\n"
-            "👉 這是你專屬的問卷連結：https://www.soulv.fun/form?teacher_id={user_id}\n\n"
-            "👇 請選擇：\n"
-            "1️⃣ 我的問卷完成率\n"
-            "2️⃣ 我要修改介紹頁面\n"
-            "3️⃣ 瞭解如何取得更多推薦"
-        )
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=text))
-
-    else:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請先選擇你的身分 🙏"))
+        elif role == '療癒師':
+            text = (
+                "🔔 [Soulv Bot] 嗨，老師 🌿 Soulv 為您準備好提升「靈性影響力」的秘密武器了！\n\n"
+                "✨【你專屬的問卷回饋任務已啟動】\n"
+                "✅ 獲得五星導師徽章\n"
+                "✅ 系統自動優先推薦\n"
+                "✅ 問卷數據成為認證依據\n\n"
+                "👉 這是你專屬的問卷連結：https://www.soulv.fun/form?teacher_id={user_id}\n\n"
+                "👇 請選擇：\n"
+                "1️⃣ 我的問卷完成率\n"
+                "2️⃣ 我要修改介紹頁面\n"
+                "3️⃣ 瞭解如何取得更多推薦"
+            )
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=text))
+    
+        else:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text="請先選擇你的身分 🙏"))
         
             
     elif mtext == '我是學員' or mtext == '我是療癒師':
