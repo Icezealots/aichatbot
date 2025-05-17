@@ -8,6 +8,7 @@ import psycopg2
 import google.generativeai as genai
 import os
 from urllib.parse import quote_plus
+from datetime import datetime
 
 
 # 初始化 Flask 應用程式
@@ -272,7 +273,22 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, message)
         except Exception as e:
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
-
+            
+    elif mtext == '我是學員' or mtext == '我是療癒師':
+        role = '學員' if mtext == '我是學員' else '療癒師'
+        user_id = event.source.user_id
+        try:
+            save_user_role_to_db(user_id, role)
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f"✅ 你已選擇「{role}」身分，感謝你加入 Soulv 🙏")
+            )
+        except Exception as e:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=f"❌ 儲存身分失敗，請稍後再試：{str(e)}")
+            )
+        
     elif mtext == '熱門體驗':
         sendCarousel(event)
         
@@ -462,6 +478,17 @@ def sendCarousel(event):
     except Exception as e:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f'發生錯誤: {str(e)}'))
 
+#取得身分
+def get_user_role(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT role FROM user_roles WHERE line_id = %s", (user_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if result:
+        return result[0]  # 回傳角色字串
+    return None
 
         # 設定資料庫連接
 def get_db_connection():
@@ -483,7 +510,21 @@ def save_feedback_to_db(user_id, feedback):
     conn.commit()
     cursor.close()
     conn.close()
-
+    
+# 儲存身分到資料庫
+def save_user_role_to_db(user_id, role):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = """
+        INSERT INTO user_roles (line_id, role)
+        VALUES (%s, %s)
+        ON CONFLICT (line_id)
+        DO UPDATE SET role = EXCLUDED.role;
+    """
+    cursor.execute(query, (user_id, role))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 if __name__ == '__main__':
     app.run()
